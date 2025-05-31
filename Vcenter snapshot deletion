@@ -1,0 +1,50 @@
+from pyVim.connect import SmartConnect, Disconnect
+import ssl
+import smtplib
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+
+# Disable SSL verification
+ssl_context = ssl._create_unverified_context()
+
+# Connect using URL
+VCENTER_URL = "https://your-vcenter-url/sdk"
+si = SmartConnect(host="your-vcenter-url", user="your_username", pwd="your_password", sslContext=ssl_context)
+
+deleted_snapshots = []
+
+
+content = si.RetrieveContent()
+for datacenter in content.rootFolder.childEntity:
+    for vm in datacenter.vmFolder.childEntity:
+        if vm.snapshot:
+            for tree in vm.snapshot.rootSnapshotList:
+                snapshot = tree.snapshot
+                snapshot_time = snapshot.createTime
+                if datetime.now() - snapshot_time > timedelta(days=15):
+                    deleted_snapshots.append(f"Snapshot: {snapshot.name} | VM: {vm.name} | Created: {snapshot_time}")
+                    snapshot.RemoveSnapshot_Task(removeChildren=False)
+
+
+Disconnect(si)
+
+# Send email with deleted snapshots list
+SMTP_SERVER = "smtp.your-email-provider.com"
+SMTP_PORT = 587
+EMAIL_SENDER = "your-email@example.com"
+EMAIL_RECEIVER = "recipient@example.com"
+EMAIL_PASSWORD = "your-email-password"
+
+msg_body = "\n".join(deleted_snapshots)
+msg = MIMEText(msg_body)
+msg["Subject"] = "Deleted VMware Snapshots Report"
+msg["From"] = EMAIL_SENDER
+msg["To"] = EMAIL_RECEIVER
+
+with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+    server.starttls()
+    server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+    server.sendmail(EMAIL_SENDER, EMAIL_RECEIVER, msg.as_string())
+
+print("Email sent successfully!")
+

@@ -4,9 +4,6 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 
-# Disable SSL verification
-ssl_context = ssl._create_unverified_context()
-
 VCENTER_URL = "https://your-vcenter-url/sdk"
 si = SmartConnect(host="your-vcenter-url", user="your_username", pwd="your_password", sslContext=ssl_context)
 
@@ -27,7 +24,6 @@ for datacenter in content.rootFolder.childEntity:
 
 Disconnect(si)
 
-# Send email with deleted snapshots list
 SMTP_SERVER = "smtp.your-email-provider.com"
 SMTP_PORT = 587
 EMAIL_SENDER = "your-email@example.com"

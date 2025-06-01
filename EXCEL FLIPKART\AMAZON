@@ -59,9 +59,7 @@ for i in range(1,20000):
     soup = BeautifulSoup(req.text, 'lxml')
     price = soup.select_one('span.a-price-whole')
 
-  print(price.text)
+    sheet[f'B{i}']=price.value
 
-#   sheet[f'B{i}']=price.value
-
-# book.save()
-# print("Complete")
+book.save()
+print("Complete")

@@ -1,48 +1,33 @@
 import pyautogui
 import time
 import random
-import sys
-import loggging
+import sys  
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("mouse_mover.log"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
 
 def get_screen_resolution():
     try:
         width, height = pyautogui.size()
-        logging.info(f"Detected screen resolution: {width}x{height}")
         return width, height
     except Exception as e:
-        logging.error(f"Failed to get screen resolution: {e}")
         sys.exit(1)
 
 def move_mouse_randomly(screen_width, screen_height):
-    """Moves the mouse to a random position within screen bounds."""
     try:
         x = random.randint(0, screen_width - 1)
         y = random.randint(0, screen_height - 1)
         pyautogui.moveTo(x, y, duration=0.5)
-        logging.info(f"Moved mouse to: ({x}, {y})")
     except Exception as e:
-        logging.error(f"Failed to move mouse: {e}")
+        print(f"Failed to move mouse: {e}")
 
 def main():
-    logging.info("Starting Mouse Mover Program...")
     screen_width, screen_height = get_screen_resolution()
 
     try:
         while True:
             move_mouse_randomly(screen_width, screen_height)
-            time.sleep(30)
+            time.sleep(30)  
     except KeyboardInterrupt:
-        logging.info("Program terminated by user.")
+        pass
 
 if __name__ == "__main__":
     main()

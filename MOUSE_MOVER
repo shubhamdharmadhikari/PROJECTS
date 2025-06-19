@@ -1,7 +1,8 @@
 import pyautogui
 import time
 import random
-import sys  
+import sys
+import math
 
 
 def get_screen_resolution():
@@ -9,24 +10,36 @@ def get_screen_resolution():
         width, height = pyautogui.size()
         return width, height
     except Exception as e:
-        print ("Error in fetching in screen resolution")
+        print("Error in fetching screen resolution")
         sys.exit(1)
 
-def move_mouse_randomly(screen_width, screen_height):
-    try:
+def get_random_position(screen_width, screen_height, prev_x, prev_y):
+    max_attempts = 100
+    for _ in range(max_attempts):
         x = random.randint(0, screen_width - 1)
         y = random.randint(0, screen_height - 1)
-        pyautogui.moveTo(x, y, duration=0.5)
+        if abs(x - prev_x) >= 50 and abs(y - prev_y) >= 50:
+            return x, y
+    return prev_x, prev_y
+
+def move_mouse_and_click(screen_width, screen_height, prev_x, prev_y):
+    try:
+        x, y = get_random_position(screen_width, screen_height, prev_x, prev_y)
+        pyautogui.moveTo(x, y)
+        pyautogui.click()
+        return x, y
     except Exception as e:
-        print(f"Failed to move mouse: {e}")
+        print(f"Failed to move or click mouse: {e}")
+        return prev_x, prev_y
 
 def main():
     screen_width, screen_height = get_screen_resolution()
+    prev_x, prev_y = 0, 0
 
     try:
         while True:
-            move_mouse_randomly(screen_width, screen_height)
-            time.sleep(30)  
+            prev_x, prev_y = move_mouse_and_click(screen_width, screen_height, prev_x, prev_y)
+            time.sleep(30)
     except KeyboardInterrupt:
         pass
 
